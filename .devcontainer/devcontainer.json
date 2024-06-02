@@ -1,0 +1,43 @@
+{
+	"name": "Codespaces Rust Starter",
+	"dockerFile": "Dockerfile",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"cschleiden.vscode-github-actions",
+				"matklad.rust-analyzer",
+				"serayuzgur.crates",
+				"vadimcn.vscode-lldb",
+				"rust-lang.rust-analyzer"
+			],
+			"settings": {
+				"editor.formatOnSave": true,
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/usr/bin/zsh"
+					}
+				},
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"files.exclude": {
+					"**/CODE_OF_CONDUCT.md": true,
+					"**/LICENSE": true
+				}
+			}
+		}
+	},
+	"forwardPorts": [80, 5173, 8000],
+	"portsAttributes": {
+		"80": {
+			"label": "nginx"
+		},
+		"5173": {
+			"label": "vite"
+		},
+		"8000": {
+			"label": "server"
+		}
+	},
+	"containerEnv": {
+		"VITE_CODESPACE_NAME": "${CODESPACE_NAME}"
+	}
+}
