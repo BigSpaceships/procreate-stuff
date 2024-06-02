@@ -6,4 +6,5 @@ docker run -it $(docker build -q .)
 
 CONTAINERID=$(docker ps -alq)
 
+mkdir -p output
 docker cp $CONTAINERID:/app/temp/Document.txt ./output/Document.txt
