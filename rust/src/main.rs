@@ -27,6 +27,7 @@ struct Key {
 enum Item {
     FakeDict(u16),
     Key(Key),
+    Value(KeyValue),
 }
 
 #[derive(Debug)]
@@ -46,16 +47,18 @@ impl Dictionary {
         self.items.push(Item::Key(key));
     }
 
+    fn add_value(&mut self, value: KeyValue) {
+        self.items.push(Item::Value(value));
+    }
+
     fn new(next_id: u16) -> Dictionary {
         let id = next_id + 1;
 
-        return 
-            Dictionary {
-                items: Vec::new(),
-                id,
-                parent: None,
-            }
-        ;
+        return Dictionary {
+            items: Vec::new(),
+            id,
+            parent: None,
+        };
     }
 }
 
@@ -86,6 +89,8 @@ fn get_type(line: &str) -> Option<LineType> {
         }
         "false/" => Some(LineType::Boolean(false)),
         "true/" => Some(LineType::Boolean(true)),
+        "array" => Some(LineType::Dict),
+        "/array" => Some(LineType::EndDict),
         _ => {
             // println!("couldn't parse {}", line_keyword);
             None
@@ -105,10 +110,6 @@ fn main() {
         let mut working_key_name: Option<String> = None;
 
         for line in file_string.lines() {
-            if i > 1000 {
-                break;
-            }
-
             if let Some(line_type) = get_type(line) {
                 match line_type {
                     LineType::Dict => {
@@ -131,37 +132,59 @@ fn main() {
                         working_dict = dict_count;
                     }
                     LineType::EndDict => {
-                        //println!("{:?}", dictionaries.get(&working_dict).unwrap());
-
                         working_dict = dictionaries.get(&working_dict).unwrap().parent.unwrap();
                     }
                     LineType::Key(key_name) => {
                         working_key_name = Some(key_name);
                     }
                     LineType::String(string_value) => {
+                        let value = KeyValue::String(string_value);
+
                         if working_key_name.is_none() {
-                            println!("no key name for line {} with value {}", i, string_value);
+                            dictionaries
+                                .get_mut(&working_dict)
+                                .unwrap()
+                                .add_value(value);
+                        } else {
+                            dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
+                                name: working_key_name.unwrap(),
+                                value,
+                            });
                         }
-                        dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
-                            name: working_key_name.unwrap(),
-                            value: KeyValue::String(string_value),
-                        });
 
                         working_key_name = None;
                     }
                     LineType::Integer(int_value) => {
-                        dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
-                            name: working_key_name.unwrap(),
-                            value: KeyValue::Integer(int_value),
-                        });
+                        let value = KeyValue::Integer(int_value);
+
+                        if working_key_name.is_none() {
+                            dictionaries
+                                .get_mut(&working_dict)
+                                .unwrap()
+                                .add_value(value)
+                        } else {
+                            dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
+                                name: working_key_name.unwrap(),
+                                value,
+                            });
+                        }
 
                         working_key_name = None;
                     }
                     LineType::Boolean(bool_value) => {
-                        dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
-                            name: working_key_name.unwrap(),
-                            value: KeyValue::Boolean(bool_value),
-                        });
+                        let value = KeyValue::Boolean(bool_value);
+
+                        if working_key_name.is_none() {
+                            dictionaries
+                                .get_mut(&working_dict)
+                                .unwrap()
+                                .add_value(value)
+                        } else {
+                            dictionaries.get_mut(&working_dict).unwrap().add_key(Key {
+                                name: working_key_name.unwrap(),
+                                value,
+                            });
+                        }
 
                         working_key_name = None;
                     }
