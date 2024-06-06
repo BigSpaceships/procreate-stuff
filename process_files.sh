@@ -7,3 +7,7 @@ for file in files/* ; do
 done
 
 echo "Processed filesystem:"
+
+ls -R
+
+tar -cf archive.tar ./temp/20E37536-6F8C-42FA-A407-B938C4D90D78
