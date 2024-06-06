@@ -7,3 +7,5 @@ for file in files/* ; do
 done
 
 echo "Processed filesystem:"
+
+ls -R 

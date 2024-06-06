@@ -2,6 +2,6 @@
 
 unzip -q $1 -d ./temp
 
-plistutil -i ./temp/Document.archive -o ./temp/Document.txt
+plistutil -i ./temp/Document.archive -o ./temp/Document.xml
 
-./archive-parser
+RUST_BACKTRACE=1 ./archive-parser
