@@ -1,4 +1,8 @@
 output
 temp
 
+test/*background
+test/background
+
 rust/target
+
