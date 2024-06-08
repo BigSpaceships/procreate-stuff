@@ -1,8 +1,11 @@
 from biplist import readPlist, InvalidPlistException, NotBinaryPlistException
 import struct
+import sys
+import json
 
 try:
-    plist = readPlist("test/colored-background/Document.archive")
+    file_name = sys.argv[1]
+    plist = readPlist(file_name)
 
     output = {}
 
@@ -56,6 +59,13 @@ try:
         layer_obj["height"] = layer_plist_obj.get("sizeHeight")
 
         output["layers"].append(layer_obj)
+
+    json_file_name = file_name.split(".")[0] + ".json"
+
+    with open(json_file_name, "w") as f:
+        json.dump(output, f, indent=2)
+
+    print("sucessfully outputed {}".format(json_file_name))
 
 except (InvalidPlistException, NotBinaryPlistException) as e:
     print("Not a plist:", e)

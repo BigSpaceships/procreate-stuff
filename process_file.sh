@@ -1,7 +1,7 @@
 #!/bin/sh
 
+rm -rf ./temp
+mkdir -p temp
 unzip -q $1 -d ./temp
 
-plistutil -i ./temp/Document.archive -o ./temp/Document.xml
-
-# RUST_BACKTRACE=1 ./archive-parser
+/venv/bin/python3 process_plist.py /app/temp/Document.archive
