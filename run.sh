@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker run -it $(docker build -q .)
+docker run --memory=10gb -it $(docker build -q .)
 
 CONTAINERID=$(docker ps -alq)
 

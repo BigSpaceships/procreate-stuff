@@ -12,10 +12,16 @@ try:
     objects = plist.get('$objects')
 
     composite_number = objects[1].get('composite').integer
-    composite_key_number = objects[composite_number].get('UUID').integer
+    composite_object = objects[composite_number]
+    composite_key_number = composite_object.get('UUID').integer
     composite_key = objects[composite_key_number]
 
-    output["composite_key"] = composite_key
+    # output["composite_key"] = composite_key
+    output["composite"] = {
+        "UUID": composite_key,
+        "width": composite_object.get("sizeWidth"),
+        "height": composite_object.get("sizeHeight"),
+    }
 
     background_color_bytes = objects[objects[1].get("backgroundColor").integer]
 
