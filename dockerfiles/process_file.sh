@@ -7,7 +7,7 @@ unzip -q $1 -d ./temp
 
 cp $1 ./temp/file.procreate
 
-/venv/bin/python3 process_plist.py /app/temp/Document.archive
+/venv/bin/python3 -i process_plist.py /app/temp/Document.archive
 
 for folder in temp/* ; do
     case $folder in 
