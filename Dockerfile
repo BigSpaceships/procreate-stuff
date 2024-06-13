@@ -10,4 +10,4 @@ ADD *.procreate ./files/
 
 RUN ./setup_python.sh
 
-# CMD $(pwd)/process_files.sh
+CMD $(pwd)/process_files.sh

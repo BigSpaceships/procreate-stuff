@@ -1,7 +1,8 @@
 use std::{
-    any::Any, env, fs::{self, File}, io::{Cursor, Read, Write}
+    any::Any, collections::HashMap, env, fs::{self, File}, io::{Cursor, Read, Write}, num::ParseIntError, path::Path
 };
 
+use image::{codecs::bmp::BmpDecoder, DynamicImage, GenericImage, ImageBuffer, ImageFormat, RgbaImage};
 use lz4_flex::frame::FrameDecoder;
 use thiserror::Error;
 use zip::{read::ZipFile, ZipArchive};
@@ -14,23 +15,39 @@ enum ProcreateError {
     ZipError(#[from] zip::result::ZipError),
     #[error("LZ4 error: {0}")]
     LZ4Error(#[from] lz4_flex::frame::Error),
+    #[error("Image eroror: {0}")]
+    ImageError(#[from] image::ImageError),
     #[error("Invalid input file: {0}")]
     InvalidInput(String),
+    #[error("buffer was too small")]
+    ImageBufferError,
+    #[error("could not convert string to int")]
+    IntegerParseError(#[from] ParseIntError)
+}
+
+#[derive(Debug)]
+struct Layer {
+    uuid: String,
+    chunks: Vec<String>,
 }
 
 fn main() -> Result<(), ProcreateError> {
     let args: Vec<String> = env::args().collect();
 
-    if !args[1].ends_with(".procreate") { // TODO: better input sanitization
-        return Err(ProcreateError::InvalidInput(args[1].clone()));
+    let file_name = args.get(1).map(|name| name.as_str()).unwrap_or("Untitled_Artwork.procreate");
+
+    if !file_name.ends_with(".procreate") { // TODO: better input sanitization
+        return Err(ProcreateError::InvalidInput(file_name.to_string().clone()));
     }
 
-    let procreate_file = fs::OpenOptions::new().read(true).write(false).open(args[1].clone())?;
-
-    let target_layer = args[2].clone();
+    let procreate_file = fs::OpenOptions::new().read(true).write(false).open(file_name)?;
 
     let mapping = unsafe { memmap2::Mmap::map(&procreate_file)? };
     let mut archive = ZipArchive::new(Cursor::new(&mapping[..]))?;
+
+    let mut layers: HashMap<String, Layer> = HashMap::new();
+
+    println!("ello???");
 
     for i in 0..(archive.len().clone()) {
         let mut file = archive.by_index(i)?;
@@ -43,33 +60,49 @@ fn main() -> Result<(), ProcreateError> {
 
         let layer_name = file_path.split('/').collect::<Vec<_>>()[0];
 
-        if !(layer_name.contains(target_layer.as_str()) || target_layer.contains(layer_name)) {
-            // println!("{} is not on target layer {}", layer_name, target_layer);
-            continue;
+        let file_name = file_path.split('/').collect::<Vec<_>>()[1];
+
+        if !layers.contains_key(layer_name) {
+            layers.insert(layer_name.to_string(), Layer { uuid: layer_name.to_string(), chunks: Vec::new() });
         }
 
-        let file_name_with_extension = file_path.split('/').collect::<Vec<_>>()[1];
+        let layer = layers.get_mut(layer_name).unwrap();
 
-        let file_name = file_name_with_extension.split('.').collect::<Vec<_>>()[0];
+        layer.chunks.push(file_name.to_string());
+    }
 
-        // println!("layer: {}, file: {}", layer_name, file_name);
+    if !Path::new("temp").exists() {
+        fs::create_dir("temp")?;
+    }
 
-        let mut buffer = Vec::new();
+    for layer in layers.values() {
+        let mut image = DynamicImage::new_rgba8(2056, 2056);
 
-        file.read_to_end(&mut buffer)?;
+        for i in 0..layer.chunks.len() {
+            let mut chunk_file = archive.by_name(format!("{}/{}", layer.uuid, layer.chunks[i]).as_str())?;
 
-        let mut decoder = FrameDecoder::new(buffer.as_slice());
+            let mut encoded_bytes = Vec::new();
+            
+            chunk_file.read_to_end(&mut encoded_bytes)?;
 
-        let mut dist = Vec::new();
+            let mut decoder = FrameDecoder::new(encoded_bytes.as_slice());
+            let mut decoded_bytes = Vec::new();
 
-        decoder.read_to_end(&mut dist)?;
+            decoder.read_to_end(&mut decoded_bytes)?;
 
-        let mut output_file = fs::OpenOptions::new()
-            .create(true)
-            .write(true)
-            .open(format!("temp/{}/{}.output", layer_name, file_name))?;
+            let chunk_image = RgbaImage::from_raw(256, 256, decoded_bytes.to_vec()).ok_or(ProcreateError::ImageBufferError)?;
 
-        output_file.write_all(&dist)?;
+            let chunk_name = layer.chunks[i].split('.').collect::<Vec<_>>()[0];
+
+            let x = u32::from_str_radix(chunk_name.split('~').collect::<Vec<_>>()[0], 10)?;
+            let y = u32::from_str_radix(chunk_name.split('~').collect::<Vec<_>>()[1], 10)?;
+
+            image.copy_from(&chunk_image, x * 256, y * 256)?;
+        }
+
+        image.save_with_format(format!("temp/{}.bmp", layer.uuid), ImageFormat::Bmp)?;
+
+        println!("processed layer {}", layer.uuid);
     }
     
     Ok(())

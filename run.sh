@@ -1,18 +1,21 @@
 #!/bin/bash
 
-$(cd rust && cargo build --target x86_64-unknown-linux-musl)
+$(cd rust && cargo build --target x86_64-unknown-linux-musl --release)
 cp rust/target/x86_64-unknown-linux-musl/debug/lz4-decoder dockerfiles/lz4-decoder
 
-docker run --memory=10gb -it $(docker build -q .)
+image_id=$(docker build -q .)
+docker run --memory=10gb -it $image_id
 
-CONTAINERID=$(docker ps -alq)
+container_id=$(docker ps -alq)
 
 mkdir -p output
-docker cp $CONTAINERID:/app/temp/Document.txt ./output/Document.txt
-docker cp $CONTAINERID:/app/archive.tar.gz ./output/archive.tar.gz
+docker cp $container_id:/app/archive.tar.gz ./output/archive.tar.gz
 # docker cp $CONTAINERID:/app/temp/formatted-archive.json ./output/formatted-archive.json
 
 mkdir -p output/layer
 tar -xvzf ./output/archive.tar.gz -C ./output
 
 rm dockerfiles/lz4-decoder
+
+# docker container rm $container_id
+# docker image rm $image_id
