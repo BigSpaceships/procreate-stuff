@@ -3,5 +3,11 @@ name = "lz4-decoder"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = [
+    # "libs/egui_dock",
+    "libs/lz4_flex"
+]
+
 [dependencies]
-lz4_flex = "0.11.3"
+lz4_flex = { path = "libs/lz4_flex" }

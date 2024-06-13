@@ -18,7 +18,7 @@ fn main() {
     let mut output_file = fs::OpenOptions::new()
         .create(true)
         .write(true)
-        .open("output.chunk").expect("couldn't create output file");
+        .open("output.bmp").expect("couldn't create output file");
 
     output_file.write_all(&dist).expect("could not write output file");
 }
