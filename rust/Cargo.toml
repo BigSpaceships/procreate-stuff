@@ -11,3 +11,6 @@ members = [
 
 [dependencies]
 lz4_flex = { path = "libs/lz4_flex" }
+memmap2 = "0.9.4"
+thiserror = "1.0.61"
+zip = "2.1.3"
