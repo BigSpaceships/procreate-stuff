@@ -1,7 +1,8 @@
 use std::{
-    fs::{self, File}, io::{Cursor, Read, Write}
+    any::Any, env, fs::{self, File}, io::{Cursor, Read, Write}
 };
 
+use lz4_flex::frame::FrameDecoder;
 use thiserror::Error;
 use zip::{read::ZipFile, ZipArchive};
 
@@ -13,37 +14,63 @@ enum ProcreateError {
     ZipError(#[from] zip::result::ZipError),
     #[error("LZ4 error: {0}")]
     LZ4Error(#[from] lz4_flex::frame::Error),
+    #[error("Invalid input file: {0}")]
+    InvalidInput(String),
 }
 
 fn main() -> Result<(), ProcreateError> {
+    let args: Vec<String> = env::args().collect();
 
-    let file = fs::OpenOptions::new().read(true).write(false).open("../Untitled_Artwork.procreate")?;
+    if !args[1].ends_with(".procreate") { // TODO: better input sanitization
+        return Err(ProcreateError::InvalidInput(args[1].clone()));
+    }
 
-    let mapping = unsafe { memmap2::Mmap::map(&file)? };
+    let procreate_file = fs::OpenOptions::new().read(true).write(false).open(args[1].clone())?;
+
+    let target_layer = args[2].clone();
+
+    let mapping = unsafe { memmap2::Mmap::map(&procreate_file)? };
     let mut archive = ZipArchive::new(Cursor::new(&mapping[..]))?;
 
-    let mut zip_file = archive.by_name("20E37536-6F8C-42FA-A407-B938C4D90D78/0~2.lz4")?;
+    for i in 0..(archive.len().clone()) {
+        let mut file = archive.by_index(i)?;
 
-    let mut buffer = Vec::new();
-    zip_file.read_to_end(&mut buffer)?;
+        let file_path = file.name().to_owned();
 
-    let mut decoder = lz4_flex::frame::FrameDecoder::new(buffer.as_slice());
+        if !file_path.contains(".lz4") {
+            continue;
+        }
 
-    let mut dist = Vec::new();
+        let layer_name = file_path.split('/').collect::<Vec<_>>()[0];
 
-    decoder.read_to_end(&mut dist)?;
+        if !(layer_name.contains(target_layer.as_str()) || target_layer.contains(layer_name)) {
+            // println!("{} is not on target layer {}", layer_name, target_layer);
+            continue;
+        }
 
-    let mut output_file = fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .open("output.bmp").expect("couldn't create output file");
+        let file_name_with_extension = file_path.split('/').collect::<Vec<_>>()[1];
 
-    // let mut output_file = fs::OpenOptions::new()
-    //     .create(true)
-    //     .write(true)
-    //     .open("output.bmp").expect("couldn't create output file");
+        let file_name = file_name_with_extension.split('.').collect::<Vec<_>>()[0];
 
-    output_file.write_all(&dist).expect("could not write output file");
+        // println!("layer: {}, file: {}", layer_name, file_name);
+
+        let mut buffer = Vec::new();
+
+        file.read_to_end(&mut buffer)?;
+
+        let mut decoder = FrameDecoder::new(buffer.as_slice());
+
+        let mut dist = Vec::new();
+
+        decoder.read_to_end(&mut dist)?;
+
+        let mut output_file = fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(format!("temp/{}/{}.output", layer_name, file_name))?;
+
+        output_file.write_all(&dist)?;
+    }
     
     Ok(())
 }

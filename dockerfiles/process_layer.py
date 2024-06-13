@@ -24,24 +24,21 @@ def main():
 
         img = Image.new("RGBA", (width, height))
 
-        zipref = zipfile.ZipFile("temp/file.procreate", "r")
+        layer_files = os.listdir("temp/" + layer_name)
 
-        allfiles = zipref.namelist()
-        layer_files = list(filter(lambda x: layer_name in x, allfiles))
+        for file_name in layer_files:
+            with open("temp/{}/{}".format(layer_name, file_name), "rb") as file:
+                img_bytes = file.read()
 
-        for file in layer_files:
-            img_file = zipref.read(file)
-            decompressed_bytes = lzo.decompress(
-                img_file, False, tile_size * tile_size * 4)
-            img_tile = Image.frombytes(
-                "RGBA", (tile_size, tile_size), decompressed_bytes)
+                img_tile = Image.frombytes(
+                    "RGBA", (tile_size, tile_size), img_bytes)
 
-            x = file.split(".")[0].split("~")[0]
-            y = file.split(".")[0].split("~")[1]
+                x = int(file_name.split(".")[0].split("~")[0])
+                y = int(file_name.split(".")[0].split("~")[1])
 
-            print(x, y)
+                # print(x, y)
 
-            img.paste(img_tile, (x * tile_size, y * tile_size))
+                img.paste(img_tile, (x * tile_size, y * tile_size))
 
         img.save("temp/{}-output.bmp".format(layer_name))
 

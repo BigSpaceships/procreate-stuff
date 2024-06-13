@@ -6,7 +6,7 @@ mkdir output
 
 files_processed=""
 
-for file in files/* ; do
+for file in files/Untitled_Artwork.procreate ; do
     sh ./process_file.sh $file
 
     if [ "$files_processed" == "" ]; then

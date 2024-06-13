@@ -6,7 +6,7 @@ test/background
 
 rust/target
 
-
+dockerfiles/lz4-decoder
 
 # Added by cargo
 

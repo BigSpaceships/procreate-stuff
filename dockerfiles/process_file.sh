@@ -7,7 +7,7 @@ unzip -q $1 -d ./temp
 
 cp $1 ./temp/file.procreate
 
-/venv/bin/python3 -i process_plist.py /app/temp/Document.archive
+/venv/bin/python3 process_plist.py /app/temp/Document.archive
 
 for folder in temp/* ; do
     case $folder in 
@@ -15,10 +15,17 @@ for folder in temp/* ; do
         "temp/Document.json") ;;
         "temp/video") ;;
         "temp/QuickLook") ;;
+        "temp/file.procreate") ;;
         *)
+            rm -r $folder/*
+            ./lz4-decoder ./temp/file.procreate $folder
             /venv/bin/python3 process_layer.py $folder
             ;;
     esac
 done
 
-tar -zcf $1.tar.gz -C ./temp . -X output_tar_exclude.txt
+cp temp/Document.json output/
+cp temp/QuickLook/Thumbnail.png output/
+cp temp/*.bmp output/
+
+tar -zcvf archive.tar.gz -C ./output .
