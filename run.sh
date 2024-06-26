@@ -1,10 +1,10 @@
 #!/bin/bash
 
-$(cd rust && cargo build --release)
-cp rust/target/release/lz4-decoder dockerfiles/lz4-decoder
+# $(cd rust && cargo build --release)
+# cp rust/target/release/lz4-decoder dockerfiles/lz4-decoder
 
 image_id=$(docker build -q .)
-docker run --memory=10gb -it $image_id
+docker run -it $image_id
 
 container_id=$(docker ps -alq)
 

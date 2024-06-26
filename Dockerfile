@@ -3,24 +3,24 @@ FROM rust:slim-buster AS build
 RUN USER=root cargo new --bin procreate-decoder
 WORKDIR /procreate-decoder
 
-COPY rust/Cargo.lock ./Cargo.lock
-COPY rust/Cargo.toml ./Cargo.toml
+COPY ./rust/Cargo.lock ./Cargo.lock
+COPY ./rust/Cargo.toml ./Cargo.toml
 
-COPY rust/libs/* .
+COPY ./rust/libs ./libs
 
 RUN cargo build --release
 RUN rm src/*.rs
 
-COPY rust/src ./src
+# copy your source tree
+COPY ./rust/src ./src
 
-RUN ls -R ./target/release
-RUN rm ./target/release/deps/procreate-decoder*
+# build for release
+RUN touch ./src/main.rs
 RUN cargo build --release
 
 FROM debian:buster-slim
 
 WORKDIR /app
-# RUN apt update && apt install -y unzip python3 python3-pip
 RUN apt update && apt install -y unzip
 
 COPY dockerfiles/* .
