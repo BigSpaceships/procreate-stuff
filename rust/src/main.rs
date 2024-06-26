@@ -100,7 +100,7 @@ fn main() -> Result<(), ProcreateError> {
             image.copy_from(&chunk_image, x * 256, y * 256)?;
         }
 
-        image.save_with_format(format!("temp/{}.bmp", layer.uuid), ImageFormat::Bmp)?;
+        image.save_with_format(format!("temp/{}.png", layer.uuid), ImageFormat::Png)?;
 
         println!("processed layer {}", layer.uuid);
     }
