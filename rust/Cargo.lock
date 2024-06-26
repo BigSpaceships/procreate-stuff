@@ -601,17 +601,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lz4-decoder"
-version = "0.1.0"
-dependencies = [
- "image",
- "lz4_flex",
- "memmap2",
- "thiserror",
- "zip",
-]
-
-[[package]]
 name = "lz4_flex"
 version = "0.11.1"
 
@@ -804,6 +793,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "procreate-decoder"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "lz4_flex",
+ "memmap2",
+ "thiserror",
+ "zip",
 ]
 
 [[package]]

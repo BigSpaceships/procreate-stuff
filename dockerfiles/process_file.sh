@@ -7,7 +7,7 @@ unzip -q $1 -d ./temp
 
 cp $1 ./temp/file.procreate
 
-/venv/bin/python3 process_plist.py /app/temp/Document.archive
+# /venv/bin/python3 process_plist.py /app/temp/Document.archive
 
 echo "processing layers"
 ./lz4-decoder ./temp/file.procreate
