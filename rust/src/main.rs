@@ -101,7 +101,10 @@ fn main() -> Result<(), ProcreateError> {
         fs::create_dir("temp")?;
     }
 
-    let doc_json_file = fs::OpenOptions::new().write(true).create(true).open("temp/Document.json")?;
+    let doc_json_file = fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open("temp/Document.json")?;
     serde_json::to_writer_pretty(doc_json_file, &doc)?;
 
     for layer in layers.values() {
@@ -129,6 +132,17 @@ fn main() -> Result<(), ProcreateError> {
             let y = u32::from_str_radix(chunk_name.split('~').collect::<Vec<_>>()[1], 10)?;
 
             image.copy_from(&chunk_image, x * 256, y * 256)?;
+        }
+
+        match doc.orientation {
+            2 => image = image.rotate180(),
+            3 => image = image.rotate270(),
+            4 => image = image.rotate90(),
+            _ => {}
+        };
+
+        if doc.flipped_horizontally {
+            image = image.fliph();
         }
 
         image.save_with_format(format!("temp/{}.png", layer.uuid), ImageFormat::Png)?;

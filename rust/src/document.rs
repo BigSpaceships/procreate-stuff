@@ -37,8 +37,8 @@ pub struct Document {
     width: u64, 
     height: u64,
 
-    orientation: u64,
-    flipped_horizontally: bool,
+    pub orientation: u64,
+    pub flipped_horizontally: bool,
 
     layers: Vec<Layer>,
 }
