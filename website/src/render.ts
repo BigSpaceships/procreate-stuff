@@ -1,3 +1,4 @@
+import { calculateProjectionMatrix, projectionMatrix } from "./controls";
 import { Buffers, ProgramInfo } from "./types";
 
 export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers) {
@@ -9,9 +10,17 @@ export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buf
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    if (gl.canvas instanceof OffscreenCanvas) {
+        return;
+    }
+
+    calculateProjectionMatrix(gl, gl.canvas);
+
     setPositionAttribute(gl, programInfo, buffers);
 
     gl.useProgram(programInfo.program);
+
+    gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

@@ -1,29 +1,10 @@
 import { initBuffers } from './buffers';
-import { render } from './draw';
+import { render } from './render';
 import './style.css'
 import { ProgramInfo } from './types';
 
-const vsSource = `
-    precision highp float;
-
-    attribute vec4 aVertexPosition;
-    varying vec2 vVertexPosition;
-
-    void main() {
-      gl_Position = aVertexPosition;
-      vVertexPosition = aVertexPosition.xy;
-    }
-`
-
-const fsSource = `
-    precision highp float;
-
-    varying vec2 vVertexPosition;
-    
-    void main() {
-        gl_FragColor = vec4(vVertexPosition.xy, 1.0, 1.0);
-    }
-`;
+import vsSource from './shaders/vertex.glsl?raw';
+import fsSource from './shaders/fragment.glsl?raw';
 
 function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: string): WebGLShader | null {
     const shader = gl.createShader(type);
@@ -77,6 +58,12 @@ function initShaderProgram(gl: WebGL2RenderingContext, vsSource: string, fsSourc
 
 function setupWebgl() {
     const webglCanvas = document.querySelector<HTMLCanvasElement>('#webgl-canvas');
+
+    if (webglCanvas == null) {
+        alert("Could not get canvas element");
+        return;
+    }
+
     const gl = webglCanvas?.getContext("webgl2");
 
     if (gl == null || gl == undefined) {
@@ -95,13 +82,16 @@ function setupWebgl() {
         return;
     }
 
+    const projectionMatrixLocation = gl.getUniformLocation(shaderProgram, "uProjectionMatrix");
+    if (projectionMatrixLocation == null) return;
+
     const programInfo: ProgramInfo = {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
         },
         uniformLocations: {
-
+            projectionMatrix: projectionMatrixLocation,
         }
     };
 
