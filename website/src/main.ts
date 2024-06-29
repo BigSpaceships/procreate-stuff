@@ -5,6 +5,7 @@ import { ProgramInfo } from './types';
 
 import vsSource from './shaders/vertex.glsl?raw';
 import fsSource from './shaders/fragment.glsl?raw';
+import { setupControls } from './controls';
 
 function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: string): WebGLShader | null {
     const shader = gl.createShader(type);
@@ -16,7 +17,6 @@ function loadShader(gl: WebGL2RenderingContext, type: GLenum, source: string): W
     gl.shaderSource(shader, source);
 
     gl.compileShader(shader);
-
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         alert(
@@ -63,6 +63,8 @@ function setupWebgl() {
         alert("Could not get canvas element");
         return;
     }
+
+    setupControls(webglCanvas);
 
     const gl = webglCanvas?.getContext("webgl2");
 

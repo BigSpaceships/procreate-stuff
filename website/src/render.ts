@@ -23,6 +23,8 @@ export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buf
     gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    requestAnimationFrame(() => render(gl, programInfo, buffers));
 }
 
 function setPositionAttribute(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers) {
