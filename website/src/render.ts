@@ -1,5 +1,5 @@
 import { calculateProjectionMatrix, projectionMatrix } from "./controls";
-import { Buffers, ProgramInfo } from "./types";
+import { Buffers, LayerProgramInfo, ProgramInfo } from "./types";
 
 export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -27,7 +27,7 @@ export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buf
     requestAnimationFrame(() => render(gl, programInfo, buffers));
 }
 
-function setPositionAttribute(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers) {
+export function setPositionAttribute(gl: WebGL2RenderingContext, programInfo: ProgramInfo | LayerProgramInfo, buffers: Buffers) {
     const numComponents = 2;
     const type = gl.FLOAT;
     const normalize = false;

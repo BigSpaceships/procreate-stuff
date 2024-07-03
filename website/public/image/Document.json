@@ -1,0 +1,113 @@
+{
+  "composite": {
+    "uuid": "56F49FFC-DC81-4D0B-83B7-E81418F42769",
+    "width": 2048,
+    "height": 2048,
+    "blend_mode": 0,
+    "opacity": 1.0,
+    "locked": false,
+    "hidden": false,
+    "name": null,
+    "clipped": false
+  },
+  "background_color": {
+    "r": 1.0,
+    "g": 1.0,
+    "b": 1.0
+  },
+  "background_hidden": true,
+  "width": 2048,
+  "height": 2048,
+  "orientation": 3,
+  "flipped_horizontally": false,
+  "layers": [
+    {
+      "uuid": "45BF0CFA-A0AA-46E7-A7D3-025DF1D16F61",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 0,
+      "opacity": 1.0,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 1",
+      "clipped": false
+    },
+    {
+      "uuid": "20E37536-6F8C-42FA-A407-B938C4D90D78",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 11,
+      "opacity": 0.29735812544822693,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 7",
+      "clipped": true
+    },
+    {
+      "uuid": "C6E64D5B-67E5-4BC4-867D-5FEE8828D6D1",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 3,
+      "opacity": 0.2703392505645752,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 6",
+      "clipped": true
+    },
+    {
+      "uuid": "84045118-E3A9-4D67-B4E2-1BA1A18EA322",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 1,
+      "opacity": 0.310867577791214,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 4",
+      "clipped": true
+    },
+    {
+      "uuid": "6DE8DC6C-CCCE-4611-8F33-39552A6E7EB9",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 1,
+      "opacity": 0.13824677467346191,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 5",
+      "clipped": true
+    },
+    {
+      "uuid": "BB11E8B5-676F-4E69-9541-AC9E10A9330D",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 1,
+      "opacity": 0.44737517833709717,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 8",
+      "clipped": true
+    },
+    {
+      "uuid": "C8C5A7B0-2541-4898-B1FA-190F36CA2F00",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 2,
+      "opacity": 0.94709312915802,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 5",
+      "clipped": true
+    },
+    {
+      "uuid": "2CAD48BA-A724-4035-A33B-CAB1466FA896",
+      "width": 2048,
+      "height": 2048,
+      "blend_mode": 0,
+      "opacity": 1.0,
+      "locked": false,
+      "hidden": false,
+      "name": "Layer 3",
+      "clipped": false
+    }
+  ]
+}
