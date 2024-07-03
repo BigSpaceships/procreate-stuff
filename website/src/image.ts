@@ -1,8 +1,8 @@
-import { Buffers, ImageJson, LayerProgramInfo } from "./types";
+import { Buffers, ImageJson, Layer, LayerProgramInfo } from "./types";
 import { initShaderProgram } from "./webgl-utils";
 
-import vsSource from './shaders/layerVertex.glsl?raw';
-import fsSource from './shaders/layerFragment.glsl?raw';
+import vsSource from './shaders/vertex.glsl?raw';
+import fsSource from './shaders/fragment.glsl?raw';
 import { initBuffers } from "./buffers";
 import { setPositionAttribute } from "./render";
 
@@ -47,13 +47,13 @@ export async function loadImage() {
     // alert(offscreenWebGL.getProgramParameter(shaderProgram, offscreenWebGL.ACTIVE_UNIFORMS));
 
     const backgroundColorLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uBackgroundColor");
-    if (backgroundColorLocation == null) return;
+    // if (backgroundColorLocation == null) return;
 
     const blendModeLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uBlendMode");
-    if (blendModeLocation == null) return;
+    // if (blendModeLocation == null) return;
 
     const opacityLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uOpacity");
-    if (opacityLocation == null) return;
+    // if (opacityLocation == null) return;
 
     programInfo = {
         program: shaderProgram,
@@ -93,11 +93,40 @@ export async function renderImage() {
 
     setPositionAttribute(offscreenWebGL, programInfo, buffers);
 
-    offscreenWebGL.drawArrays(offscreenWebGL.TRIANGLE_STRIP, 0, 4);
+    // for (let i = 0; i++; i < imageData.layers.length) {
+    //     let image = renderLayer(imageData.layers[i]);        
+    // }
+    renderLayer(imageData.composite);
 
     let blob = await offscreenCanvas.convertToBlob();
 
     let url = URL.createObjectURL(blob);
 
-    window.open(url);
+    window.open(url, undefined, `width=200,height=200,popup`);
+}
+
+async function renderLayer(layer: Layer): Promise<void | ImageBitmap | undefined> {
+    if (imageData == null || offscreenWebGL == null) {
+        return undefined;
+    }
+
+    let layerImg = await fetch(`image/${layer.uuid}.png`);
+
+    let layerArrayBuffer = await layerImg.arrayBuffer();
+
+    // const texture = offscreenWebGL.createTexture();
+
+    // offscreenWebGL.bindTexture(offscreenWebGL.TEXTURE_2D, texture);
+
+    // offscreenWebGL.texImage2D(offscreenWebGL.TEXTURE_2D, 0, offscreenWebGL.RGBA, imageData.width, imageData.height, 0, offscreenWebGL.RGBA, offscreenWebGL.UNSIGNED_BYTE, layerArrayBuffer);
+
+    // offscreenWebGL.generateMipmap(offscreenWebGL.TEXTURE_2D);
+
+    offscreenWebGL.clearColor(0.0, 0.0, 0.0, 0.0);
+
+    offscreenWebGL.clear(offscreenWebGL.COLOR_BUFFER_BIT);
+
+    offscreenWebGL.drawArrays(offscreenWebGL.TRIANGLE_STRIP, 0, 4);
+
+    // return offscreenCanvas?.transferToImageBitmap();
 }

@@ -7,7 +7,7 @@ uniform int uBlendMode;
 uniform float uOpacity;
 
 void main() {
-    if (uBlendMode != -1) {
-        gl_FragColor = uBackgroundColor * uOpacity;
-    }
+    // if (uBlendMode != -1) {
+        gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+    // }
 }

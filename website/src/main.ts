@@ -60,6 +60,6 @@ function setupWebgl() {
     render(gl, programInfo, buffers);
 }
 
-setupWebgl();
+// setupWebgl();
 
 await loadImage();
