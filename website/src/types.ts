@@ -2,9 +2,11 @@ export type ProgramInfo = {
     program: WebGLProgram,
     attribLocations: {
         vertexPosition: number,
+        uvCoord: number,
     },
     uniformLocations: {
         projectionMatrix: WebGLUniformLocation,
+        sampler: WebGLUniformLocation,
     },
 }
 

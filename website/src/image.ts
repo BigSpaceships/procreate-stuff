@@ -5,6 +5,7 @@ import vsSource from './shaders/layerVertex.glsl?raw';
 import fsSource from './shaders/layerFragment.glsl?raw';
 import { initBuffers } from "./buffers";
 import { mat4 } from "gl-matrix";
+import { loadTexture, setPositionAttribute, setUVAttribute } from "./util";
 
 export var offscreenCanvas: OffscreenCanvas | undefined;
 
@@ -15,7 +16,7 @@ var imageData: ImageJson | null;
 
 var offscreenWebGL: WebGL2RenderingContext | null;
 
-export async function loadImage() {
+export async function loadImage(onComplete: (img: ImageBitmap) => void) {
     let imgJson = await fetch("/image/Document.json");
     let json = await imgJson.json();
 
@@ -78,94 +79,33 @@ export async function loadImage() {
 
     imageData = image;
 
-    await renderImage();
+    await renderImage(onComplete);
 }
 
-export async function renderImage() {
+export async function renderImage(onComplete: (img: ImageBitmap) => void) {
     if (offscreenCanvas == undefined || offscreenWebGL == null || imageData == null || programInfo == null || buffers == null) {
         alert("oops");
         return null; //huh i fucked up
     }
 
-    {
-        const numComponents = 2;
-        const type = offscreenWebGL.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-
-        offscreenWebGL.bindBuffer(offscreenWebGL.ARRAY_BUFFER, buffers.position);
-
-        offscreenWebGL.vertexAttribPointer(
-            programInfo.attribLocations.vertexPosition,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-
-        offscreenWebGL.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-    }
-
-    {
-        const numComponents = 2;
-        const type = offscreenWebGL.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-
-        offscreenWebGL.bindBuffer(offscreenWebGL.ARRAY_BUFFER, buffers.uvs);
-
-        offscreenWebGL.vertexAttribPointer(
-            programInfo.attribLocations.uvCoord,
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-
-        offscreenWebGL.enableVertexAttribArray(programInfo.attribLocations.uvCoord);
-    }
+    setPositionAttribute(offscreenWebGL, programInfo, buffers);
+    setUVAttribute(offscreenWebGL, programInfo, buffers);
 
     offscreenWebGL.useProgram(programInfo?.program);
 
-    await renderLayer(imageData.composite);
+    let image = await renderLayer(imageData.composite);
 
     if (true) {
-        let blob = await offscreenCanvas.convertToBlob();
-
-        let url = URL.createObjectURL(blob);
-
-        window.open(url, undefined, `width=200,height=200,popup`);
+        if (image instanceof ImageBitmap) {
+            onComplete(image);
+        } else {
+            console.error("image is not bitmap thing");
+        }
     } else {
-        requestAnimationFrame(async () => { await renderImage() });
+        requestAnimationFrame(async () => { await renderImage(onComplete) });
     }
 
     console.log(offscreenWebGL.getProgramInfoLog(programInfo.program));
-}
-
-async function loadTexture(gl: WebGL2RenderingContext, src: string): Promise<WebGLTexture | null> {
-    return new Promise(resolve => {
-        const image = new Image();
-
-        image.onload = () => {
-            const texture = gl.createTexture();
-
-            if (texture == null) {
-                return null;
-            }
-
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-            resolve(texture);
-        }
-        image.src = src;
-    })
 }
 
 async function renderLayer(layer: Layer): Promise<void | ImageBitmap | undefined> {
@@ -196,5 +136,5 @@ async function renderLayer(layer: Layer): Promise<void | ImageBitmap | undefined
 
     offscreenWebGL.drawArrays(offscreenWebGL.TRIANGLE_STRIP, 0, 4);
 
-    // return offscreenCanvas?.transferToImageBitmap();
+    return offscreenCanvas?.transferToImageBitmap();
 }

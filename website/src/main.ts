@@ -8,8 +8,9 @@ import fsSource from './shaders/fragment.glsl?raw';
 import { setupControls } from './controls';
 import { loadImage } from './image';
 import { initShaderProgram } from './webgl-utils';
+import { loadTexture } from './util';
 
-function setupWebgl() {
+async function setupWebgl() {
     const webglCanvas = document.querySelector<HTMLCanvasElement>('#webgl-canvas');
 
     if (webglCanvas == null) {
@@ -40,13 +41,18 @@ function setupWebgl() {
     const projectionMatrixLocation = gl.getUniformLocation(shaderProgram, "uProjectionMatrix");
     if (projectionMatrixLocation == null) return;
 
+    const samplerLocation = gl.getUniformLocation(shaderProgram, "uSampler");
+    if (samplerLocation == null) return;
+
     const programInfo: ProgramInfo = {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+            uvCoord: gl.getAttribLocation(shaderProgram, "aUVCoord"),
         },
         uniformLocations: {
             projectionMatrix: projectionMatrixLocation,
+            sampler: samplerLocation,
         }
     };
 
@@ -57,9 +63,19 @@ function setupWebgl() {
         return;
     }
 
-    render(gl, programInfo, buffers);
+    const renderedTexture = gl.createTexture();
+
+    if (renderedTexture == null) return;
+    gl.bindTexture(gl.TEXTURE_2D, renderedTexture);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255]));
+
+    render(gl, programInfo, buffers, renderedTexture);
+
+    await loadImage((result) => {
+        loadTexture(gl, result, renderedTexture);
+    });
 }
 
-setupWebgl();
+await setupWebgl();
 
-await loadImage();

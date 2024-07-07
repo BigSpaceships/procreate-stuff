@@ -1,7 +1,8 @@
 import { calculateProjectionMatrix, projectionMatrix } from "./controls";
 import { Buffers, LayerProgramInfo, ProgramInfo } from "./types";
+import { setPositionAttribute, setUVAttribute } from "./util";
 
-export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers) {
+export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buffers: Buffers, renderedTexture: WebGLTexture) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
 
@@ -17,6 +18,7 @@ export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buf
     calculateProjectionMatrix(gl, gl.canvas);
 
     setPositionAttribute(gl, programInfo, buffers);
+    setUVAttribute(gl, programInfo, buffers);
 
     gl.useProgram(programInfo.program);
 
@@ -24,26 +26,5 @@ export function render(gl: WebGL2RenderingContext, programInfo: ProgramInfo, buf
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-    requestAnimationFrame(() => render(gl, programInfo, buffers));
-}
-
-export function setPositionAttribute(gl: WebGL2RenderingContext, programInfo: ProgramInfo | LayerProgramInfo, buffers: Buffers) {
-    const numComponents = 2;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-
-    gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexPosition,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset,
-    );
-
-    gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+    requestAnimationFrame(() => render(gl, programInfo, buffers, renderedTexture));
 }
