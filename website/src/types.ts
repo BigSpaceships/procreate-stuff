@@ -14,6 +14,7 @@ export type LayerProgramInfo = {
         vertexPosition: number,
     },
     uniformLocations: {
+        projectionMatrix: WebGLUniformLocation, 
         backgroundColor: WebGLUniformLocation,
         blendMode: WebGLUniformLocation,
         opacity: WebGLUniformLocation,

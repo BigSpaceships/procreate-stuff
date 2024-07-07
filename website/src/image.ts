@@ -1,10 +1,10 @@
 import { Buffers, ImageJson, Layer, LayerProgramInfo } from "./types";
 import { initShaderProgram } from "./webgl-utils";
 
-import vsSource from './shaders/vertex.glsl?raw';
-import fsSource from './shaders/fragment.glsl?raw';
+import vsSource from './shaders/layerVertex.glsl?raw';
+import fsSource from './shaders/layerFragment.glsl?raw';
 import { initBuffers } from "./buffers";
-import { setPositionAttribute } from "./render";
+import { mat4 } from "gl-matrix";
 
 export var offscreenCanvas: OffscreenCanvas | undefined;
 
@@ -33,10 +33,6 @@ export async function loadImage() {
         return;
     }
 
-    offscreenWebGL.clearColor(0.0, 0.0, 0.0, 0.0);
-
-    offscreenWebGL.clear(offscreenWebGL.COLOR_BUFFER_BIT);
-
     const shaderProgram = initShaderProgram(offscreenWebGL, vsSource, fsSource);
 
     if (shaderProgram == null) {
@@ -45,8 +41,9 @@ export async function loadImage() {
     }
 
     // alert(offscreenWebGL.getProgramParameter(shaderProgram, offscreenWebGL.ACTIVE_UNIFORMS));
-
     const backgroundColorLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uBackgroundColor");
+
+    const projectionMatrixLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uProjectionMatrix");
     // if (backgroundColorLocation == null) return;
 
     const blendModeLocation = offscreenWebGL.getUniformLocation(shaderProgram, "uBlendMode");
@@ -61,6 +58,7 @@ export async function loadImage() {
             vertexPosition: offscreenWebGL.getAttribLocation(shaderProgram, "aVertexPosition"),
         },
         uniformLocations: {
+            projectionMatrix: projectionMatrixLocation,
             backgroundColor: backgroundColorLocation,
             blendMode: blendModeLocation,
             opacity: opacityLocation,
@@ -85,34 +83,48 @@ export async function renderImage() {
         return null; //huh i fucked up
     }
 
+    const numComponents = 2;
+    const type = offscreenWebGL.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+
+    offscreenWebGL.bindBuffer(offscreenWebGL.ARRAY_BUFFER, buffers.position);
+
+    offscreenWebGL.vertexAttribPointer(
+        programInfo.attribLocations.vertexPosition,
+        numComponents,
+        type,
+        normalize,
+        stride,
+        offset,
+    );
+
+    offscreenWebGL.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+
     offscreenWebGL.useProgram(programInfo?.program);
 
-    offscreenWebGL.clearColor(0.0, 0.0, 0.0, 0.0);
+    await renderLayer(imageData.composite);
 
-    offscreenWebGL.clear(offscreenWebGL.COLOR_BUFFER_BIT);
-
-    setPositionAttribute(offscreenWebGL, programInfo, buffers);
-
-    // for (let i = 0; i++; i < imageData.layers.length) {
-    //     let image = renderLayer(imageData.layers[i]);        
-    // }
-    renderLayer(imageData.composite);
 
     let blob = await offscreenCanvas.convertToBlob();
 
     let url = URL.createObjectURL(blob);
 
     window.open(url, undefined, `width=200,height=200,popup`);
+
+    console.log(offscreenWebGL.getProgramInfoLog(programInfo.program));
+    // requestAnimationFrame(async () => {await renderImage()});
 }
 
 async function renderLayer(layer: Layer): Promise<void | ImageBitmap | undefined> {
-    if (imageData == null || offscreenWebGL == null) {
+    if (programInfo == null || imageData == null || offscreenWebGL == null) {
         return undefined;
     }
 
-    let layerImg = await fetch(`image/${layer.uuid}.png`);
+    // let layerImg = await fetch(`image/${layer.uuid}.png`);
 
-    let layerArrayBuffer = await layerImg.arrayBuffer();
+    // let layerArrayBuffer = await layerImg.arrayBuffer();
 
     // const texture = offscreenWebGL.createTexture();
 
@@ -121,8 +133,14 @@ async function renderLayer(layer: Layer): Promise<void | ImageBitmap | undefined
     // offscreenWebGL.texImage2D(offscreenWebGL.TEXTURE_2D, 0, offscreenWebGL.RGBA, imageData.width, imageData.height, 0, offscreenWebGL.RGBA, offscreenWebGL.UNSIGNED_BYTE, layerArrayBuffer);
 
     // offscreenWebGL.generateMipmap(offscreenWebGL.TEXTURE_2D);
+    var projectionMatrix = mat4.create();
+    mat4.ortho(projectionMatrix, -1, 1, -1, 1, -1, 1);
+    
+    offscreenWebGL.useProgram(programInfo.program);
+    
+    offscreenWebGL.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 
-    offscreenWebGL.clearColor(0.0, 0.0, 0.0, 0.0);
+    offscreenWebGL.clearColor(0.0, 0.0, 0.0, 1.0);
 
     offscreenWebGL.clear(offscreenWebGL.COLOR_BUFFER_BIT);
 

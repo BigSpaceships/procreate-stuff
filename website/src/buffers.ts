@@ -3,7 +3,10 @@ import { Buffers } from "./types";
 export function initBuffers(gl: WebGL2RenderingContext): Buffers | null {
     const positionBuffer = initPositionBuffer(gl);
 
-    if (positionBuffer == null) return null;
+    if (positionBuffer == null) { 
+        console.error("position buffer was null");
+        return null;
+    }
 
     return {
         position: positionBuffer
@@ -13,7 +16,10 @@ export function initBuffers(gl: WebGL2RenderingContext): Buffers | null {
 function initPositionBuffer(gl: WebGL2RenderingContext): WebGLBuffer | null {
     const positionBuffer = gl.createBuffer();
 
-    if (positionBuffer == null) return null;
+    if (positionBuffer == null) {
+        console.error("position buffer was null");
+        return null;
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
