@@ -4,7 +4,7 @@ export type ProgramInfo = {
         vertexPosition: number,
     },
     uniformLocations: {
-        projectionMatrix: WebGLUniformLocation, 
+        projectionMatrix: WebGLUniformLocation,
     },
 }
 
@@ -12,10 +12,12 @@ export type LayerProgramInfo = {
     program: WebGLProgram,
     attribLocations: {
         vertexPosition: number,
+        uvCoord: number,
     },
     uniformLocations: {
-        projectionMatrix: WebGLUniformLocation, 
+        projectionMatrix: WebGLUniformLocation,
         backgroundColor: WebGLUniformLocation,
+        sampler: WebGLUniformLocation,
         blendMode: WebGLUniformLocation,
         opacity: WebGLUniformLocation,
     },
@@ -23,6 +25,7 @@ export type LayerProgramInfo = {
 
 export type Buffers = {
     position: WebGLBuffer,
+    uvs: WebGLBuffer,
 };
 
 export type Color = {
@@ -49,7 +52,7 @@ export type ImageJson = {
     background_color: Color,
     background_hidden: boolean,
 
-    width: number, 
+    width: number,
     height: number,
 
     orientation: number,
