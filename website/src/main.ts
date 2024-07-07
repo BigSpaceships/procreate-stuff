@@ -68,7 +68,7 @@ async function setupWebgl() {
     if (renderedTexture == null) return;
     gl.bindTexture(gl.TEXTURE_2D, renderedTexture);
 
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
 
     render(gl, programInfo, buffers, renderedTexture);
 
