@@ -94,6 +94,7 @@ export async function renderImage(gl: WebGL2RenderingContext, programInfo: Layer
     var image: ImageBitmap;
 
     for (let i = 0; i < imageData.layers.length; i++) {
+    // for (let i = 0; i < 6; i++) {
         const result = await renderLayer(gl, programInfo, imageData.layers[i], currentResultTexture);
 
         if (result == null || result == undefined) {

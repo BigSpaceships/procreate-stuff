@@ -48,7 +48,7 @@ function initUVBuffer(gl: WebGL2RenderingContext): WebGLBuffer | null {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
 
-    const uvs = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
+    const uvs = [1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uvs), gl.STATIC_DRAW);
 
