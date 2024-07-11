@@ -34,7 +34,7 @@ pub struct Document {
     background_color: Color,
     background_hidden: bool,
 
-    width: u64, 
+    width: u64,
     height: u64,
 
     pub orientation: u64,
@@ -56,6 +56,7 @@ impl Layer {
         dictionary: &Dictionary,
         objects: &Vec<Value>,
     ) -> Result<Self, PlistParseError> {
+
         Ok(Layer {
             uuid: objects[dictionary
                 .get("UUID")
@@ -203,12 +204,23 @@ impl Document {
             .as_boolean()
             .ok_or_else(|| PlistParseError::TypeError("flippedHorizontally".to_string()))?;
 
-        let size_id = base_object.get("size").ok_or_else(|| PlistParseError::MissingKey("size".to_string()))?
-            .as_uid().ok_or_else(|| PlistParseError::TypeError("size".to_string()))?.get() as usize;
+        let size_id = base_object
+            .get("size")
+            .ok_or_else(|| PlistParseError::MissingKey("size".to_string()))?
+            .as_uid()
+            .ok_or_else(|| PlistParseError::TypeError("size".to_string()))?
+            .get() as usize;
 
-        let size_string = objects[size_id].as_string().ok_or_else(|| PlistParseError::MissingKey("size".to_string()))?;
+        let size_string = objects[size_id]
+            .as_string()
+            .ok_or_else(|| PlistParseError::MissingKey("size".to_string()))?;
 
-        let size_array = size_string.trim_start_matches('{').trim_end_matches('}').split(", ").map(|dim| dim.parse::<u64>()).collect::<Result<Vec<u64>,_>>()?;
+        let size_array = size_string
+            .trim_start_matches('{')
+            .trim_end_matches('}')
+            .split(", ")
+            .map(|dim| dim.parse::<u64>())
+            .collect::<Result<Vec<u64>, _>>()?;
 
         let layers_id = base_object
             .get("layers")
