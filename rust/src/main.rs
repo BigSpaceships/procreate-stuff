@@ -134,16 +134,16 @@ fn main() -> Result<(), ProcreateError> {
             image.copy_from(&chunk_image, x * 256, y * 256)?;
         }
 
-        match doc.orientation {
-            2 => image = image.rotate180(),
-            3 => image = image.rotate270(),
-            4 => image = image.rotate90(),
-            _ => {}
-        };
+        // match doc.orientation {
+        //     2 => image = image.rotate180(),
+        //     3 => image = image.rotate270(),
+        //     4 => image = image.rotate90(),
+        //     _ => {}
+        // };
 
-        if doc.flipped_horizontally {
-            image = image.fliph();
-        }
+        // if doc.flipped_horizontally {
+        //     image = image.fliph();
+        // }
 
         image.save_with_format(format!("temp/{}.png", layer.uuid), ImageFormat::Png)?;
 
