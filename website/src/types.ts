@@ -18,8 +18,8 @@ export type LayerProgramInfo = {
     },
     uniformLocations: {
         projectionMatrix: WebGLUniformLocation,
-        backgroundColor: WebGLUniformLocation,
         sampler: WebGLUniformLocation,
+        currentTexture: WebGLUniformLocation,
         blendMode: WebGLUniformLocation,
         opacity: WebGLUniformLocation,
     },

@@ -9,11 +9,11 @@ files_processed=""
 for file in files/Untitled_Artwork.procreate ; do
     sh ./process_file.sh $file
 
-    if [ "$files_processed" == "" ]; then
-        files_processed=${file}
-    else
-        files_processed="${files_processed}, ${file}"
-    fi
+    # if [ "$files_processed" == "" ]; then
+    #     files_processed=${file}
+    # else
+    #     files_processed="${files_processed}, ${file}"
+    # fi
 done
 
 echo "Processed filesystem: $files_processed"
