@@ -70,13 +70,13 @@ export async function loadImage(onComplete: (img: ImageBitmap) => void) {
     await renderImage(gl, programInfo, buffers, image, onComplete);
 }
 
-export async function renderImage(gl: WebGL2RenderingContext, programInfo: LayerProgramInfo, buffers: Buffers, 
-                                  imageData: ImageJson, onComplete: (img: ImageBitmap) => void) {
+export async function renderImage(gl: WebGL2RenderingContext, programInfo: LayerProgramInfo, buffers: Buffers,
+    imageData: ImageJson, onComplete: (img: ImageBitmap) => void) {
 
     setPositionAttribute(gl, programInfo, buffers);
     setUVAttribute(gl, programInfo, buffers);
 
-    gl.useProgram(programInfo?.program);
+    gl.useProgram(programInfo.program);
 
     let backgroundPixel = imageData.background_hidden ? [0, 0, 0, 0] :
         [imageData.background_color.r * 255, imageData.background_color.g * 255, imageData.background_color.b * 255, 255];
@@ -94,8 +94,8 @@ export async function renderImage(gl: WebGL2RenderingContext, programInfo: Layer
     var image: ImageBitmap;
 
     for (let i = 0; i < imageData.layers.length; i++) {
-    // for (let i = 0; i < 6; i++) {
-        const result = await renderLayer(gl, programInfo, imageData.layers[i], currentResultTexture);
+        // for (let i = 0; i < 6; i++) {
+        const result = await renderLayer(gl, programInfo, imageData.layers[i], imageData, currentResultTexture);
 
         if (result == null || result == undefined) {
             continue;
@@ -109,6 +109,8 @@ export async function renderImage(gl: WebGL2RenderingContext, programInfo: Layer
         image = result;
     }
 
+    image = correctOrientation(gl, programInfo, currentResultTexture, imageData);
+
     if (true) {
         onComplete(image);
     } else {
@@ -118,7 +120,7 @@ export async function renderImage(gl: WebGL2RenderingContext, programInfo: Layer
     console.log(gl.getProgramInfoLog(programInfo.program));
 }
 
-async function renderLayer(gl: WebGL2RenderingContext, programInfo: LayerProgramInfo, layer: Layer, currentResultTexture: WebGLTexture): Promise<void | ImageBitmap | undefined> {
+async function renderLayer(gl: WebGL2RenderingContext, programInfo: LayerProgramInfo, layer: Layer, imageData: ImageJson, currentResultTexture: WebGLTexture): Promise<void | ImageBitmap | undefined> {
     console.log(layer);
 
     if (layer.hidden) {
@@ -126,6 +128,11 @@ async function renderLayer(gl: WebGL2RenderingContext, programInfo: LayerProgram
     }
 
     gl.useProgram(programInfo.program);
+
+    var projectionMatrix = mat4.create();
+    mat4.ortho(projectionMatrix, -1, 1, -1, 1, -1, 1);
+
+    gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 
     // load texture 
 
@@ -139,10 +146,44 @@ async function renderLayer(gl: WebGL2RenderingContext, programInfo: LayerProgram
     gl.bindTexture(gl.TEXTURE_2D, currentResultTexture);
     gl.uniform1i(programInfo.uniformLocations.currentTexture, 1);
 
+    gl.uniform1f(programInfo.uniformLocations.opacity, layer.opacity);
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    return (gl.canvas as OffscreenCanvas).transferToImageBitmap();
+}
+
+function correctOrientation(gl: WebGL2RenderingContext, programInfo: LayerProgramInfo, resultTexture: WebGLTexture, imageData: ImageJson): ImageBitmap {
+    gl.useProgram(programInfo.program);
+
     var projectionMatrix = mat4.create();
     mat4.ortho(projectionMatrix, -1, 1, -1, 1, -1, 1);
 
+    switch (imageData.orientation) {
+        case 2:
+            mat4.rotateZ(projectionMatrix, projectionMatrix, Math.PI);
+            break;
+        case 3:
+            mat4.rotateZ(projectionMatrix, projectionMatrix, Math.PI * 0.5);
+            break;
+        case 4:
+            mat4.rotateZ(projectionMatrix, projectionMatrix, Math.PI * 1.5);
+            break;
+    }
+
     gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+
+    // load texture 
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, resultTexture);
+    gl.uniform1i(programInfo.uniformLocations.currentTexture, 1);
+
+    gl.uniform1f(programInfo.uniformLocations.opacity, 0);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
