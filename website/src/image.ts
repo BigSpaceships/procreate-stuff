@@ -148,6 +148,8 @@ async function renderLayer(gl: WebGL2RenderingContext, programInfo: LayerProgram
 
     gl.uniform1f(programInfo.uniformLocations.opacity, layer.opacity);
 
+    gl.uniform1i(programInfo.uniformLocations.blendMode, layer.blend_mode);
+
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
