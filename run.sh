@@ -17,5 +17,7 @@ docker cp $container_id:/app/archive.tar.gz ./output/archive.tar.gz
 mkdir -p output/layer
 tar -xvzf ./output/archive.tar.gz -C ./output
 
+cp ./output/* ./website/public/image
+
 docker container rm $container_id
 docker image rm $image_id

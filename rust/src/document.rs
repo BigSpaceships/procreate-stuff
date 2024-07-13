@@ -253,6 +253,8 @@ impl Document {
             layers.push(Layer::from_dictionary(layer_dictionary, &objects)?);
         }
 
+        layers.reverse();
+
         Ok(Document {
             composite: Layer::from_dictionary(composite, &objects)?,
             background_color: Color {
